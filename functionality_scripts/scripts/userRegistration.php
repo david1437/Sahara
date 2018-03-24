@@ -15,7 +15,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         $timestamp = date('Y-m-d G:i:s');
         */
         // attempting to create user.
-        $db_response = $db->createUser( $_POST['u_pword'],  $_POST['e_email'])
+        $db_response = $db->createUser($_POST['u_email'],$_POST['u_pword']);
         if($db_response){
           $response['error'] = false;
           $response['message'] = "User: " . $_POST['e_email'] . " created successfully ";

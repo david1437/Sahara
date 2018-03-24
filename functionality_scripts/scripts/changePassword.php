@@ -1,7 +1,5 @@
 <?php
 
- // Script that does changes an user password on request. -Diego Fabiano
-   // Script Reviewed the 9/7/2017 after incorporating email encryption.
 
 require_once '../includes/DBManipulation.php';
 
@@ -10,7 +8,7 @@ $response = array();
 if($_SERVER['REQUEST_METHOD']=='POST'){
 
     if(isset($_POST['email']) and isset($_POST['old_password']) and isset($_POST['new_password'])){ // Making sure that the right method is requested.
-        $db = new DBManipulation(); 
+        $db = new DBManipulation();
         if($db->userLogin($_POST['email'], $_POST['old_password'])){ // We pass email and password to userLogin which will find if there is such matching pair, if there is then we can change the user old password.
 
           $dbfeedback = $db->updatePassword($_POST['email'], $_POST['new_password']);

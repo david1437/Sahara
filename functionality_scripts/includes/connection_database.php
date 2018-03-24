@@ -2,7 +2,7 @@
 
 // Script contains function that stablishes a connection with the database. -Diego Fabiano
     class DBConnection{
-        private $connection; 
+        private $connection;
         function __construct(){
         }
 

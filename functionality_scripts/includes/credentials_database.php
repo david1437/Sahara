@@ -6,7 +6,7 @@
 
 	define('DATABASE_USER','root');
 
-	define('DATABASE_PASSWORD','sahara123');
+	define('DATABASE_PASSWORD','Stephanie101095');
 
 	define('DATABASE_HOST','localhost');
 

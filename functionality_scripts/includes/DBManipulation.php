@@ -15,7 +15,8 @@
 
         // create a new user in the database.
         public function createUser(&$u_email, &$u_pword){
-            if($this->doesUserExist($u_email)){ // If user is already in the database, then we don't want to override if this happens we return 0.
+          // If user is already in the database, then we don't want to override if this happens we return 0.
+            if($this->doesUserExist($u_email)){
                 return -1;
             }else{
                 $password = $this->USF_encrypt($u_pword);
@@ -28,50 +29,47 @@
                 }
             }
         }
-
-        public function getQuestionId($user_id, $generated_time){
-          $statement = $this->connection->prepare("SELECT * FROM question WHERE user_id = ? AND generated_time = ?");
-          $statement->bind_param("ss",$user_id,$generated_time);
-          $statement->execute();
-          return $statement->get_result()->fetch_assoc();
+        // update user profile
+        public function updateUserProfile(&$parameters, &$u_email){
+          // If user is NOT in the database, then we can't change anything
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            }else{
+              // need to get parameters
+              foreach ($parameters as $key => $value)
+              {
+                $attribute = $key;
+                $attribute_value = $value;
+                $statement = $this->connection->prepare("UPDATE user SET ? = ? WHERE u_email = ?"); // If the user doesn't exist we will try to create it.
+                $statement->bind_param("sss",$attribute,$attribute_value,$u_email);
+                // in case query fails
+                if(!$statement->execute())
+                {
+                  return 0;
+                }
+              }
+              // If we got here all queries were successfull.
+              return 1;
+            }
         }
 
  		// userLogin function searches for matching parameters (email, password) in the database.
-         public function userLogin(&$email, &$pass){
-            $password = md5($pass);
-            $email_secure = $this->USF_encrypt($email);
-            $statement = $this->connection->prepare("SELECT id FROM user WHERE email = ? AND password = ?");
-            $statement->bind_param("ss", $email_secure,$password);
+         public function userLogin(&$u_email, &$u_pword){
+            $password = $this->USF_encrypt($u_pword);
+
+            $statement = $this->connection->prepare("SELECT u_recid FROM users WHERE u_email = ? AND u_pword = ?");
+            $statement->bind_param("ss", $u_email,$password);
             $statement->execute();
             $statement->store_result();
             return $statement->num_rows > 0;
         }
 
  		// getUserByEmail finds a particular email for the user that we are looking for and returns all the information related to that email.
-        public function getUserByEmail(&$email){
-            $email_secure = $this->USF_encrypt($email);
-            $statement = $this->connection->prepare("SELECT * FROM user WHERE email = ?");
-            $statement->bind_param("s",$email_secure);
+        public function getUserByEmail(&$u_email){
+            $statement = $this->connection->prepare("SELECT * FROM user WHERE u_email = ?");
+            $statement->bind_param("s",$u_email);
             $statement->execute();
             return $statement->get_result()->fetch_assoc();
-        }
-
-        // getUserByUserId finds a particular id for the user that we are looking for and returns all the information related to that user id.
-        public function getUserByUserId(&$id){
-            $statement = $this->connection->prepare("SELECT * FROM user WHERE id = ?");
-            $statement->bind_param("s",$id);
-            $statement->execute();
-            return $statement->get_result()->fetch_assoc();
-        }
-
-       public function updateNotificationStatus(&$question_id){
-            $statement = $this->connection->prepare("UPDATE question SET  needs_notification = (0) WHERE id = (?);");
-            $statement->bind_param("i", $question_id);
-            if($statement->execute()){ // If statement executed we need a way to know that it did, therefore we return 1.
-                    return 1;
-                }else{
-                    return 2; // Also a way to know it did not, therefore we return 2.
-                }
         }
 
  		// doesUserExist checks if an user is already in the database by email.
@@ -82,32 +80,6 @@
             $statement->store_result();
             return $statement->num_rows > 0;
         }
-
-        // If we want to send a specific push, then we need a specific token and we use email as identifier... This function returns the token related to that user.
-        public function getToken(&$email){
-        	$statement = $this->connection->prepare("SELECT token_id FROM user WHERE email = ?");
-        	$statement->bind_param("s", $email);
-        	$statement->execute();
-        	$response = $statement->get_result()->fetch_assoc();
-        	return array($response['token_id']);
-        }
-
-        // Getting all the information from all users enrolled in the app. This function is not yet used and was made for future functionalities that the App will potentially have.
- 		   public function getAllUsers(){
-            $statement = $this->connection->prepare("SELECT * FROM user");
-            $statement->execute();
-            $response = $statement->get_result();
-            return $response;
-        }
-
-        // getResponseValueId gets the id of an specific response in the response_value table
-        public function getResponseValueId(&$response){
-            $statement = $this->connection->prepare("SELECT id FROM response_value WHERE value = (?)");
-            $statement->bind_param("s",$response);
-            $statement->execute();
-            return $statement->get_result()->fetch_assoc();
-        }
-
 
         public function USF_decrypt(&$string) {
             $output = false;
