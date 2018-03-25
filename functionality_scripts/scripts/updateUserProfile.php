@@ -16,10 +16,10 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         */
         // attempting to create user.
         $db_response = $db->updateUserProfile($_POST['u_email'],$_POST['parameters']);
-        if($db_response){
+        if($db_response == 1){
           $response['error'] = false;
           $response['message'] = "User: " . $_POST['e_email'] . " updated successfully ";
-        } else if($db_response < 0){
+        } else if($db_response == -1){
           $response['error'] = true;
           $response['message'] = "User is not in the database, please register the user";
         } else {

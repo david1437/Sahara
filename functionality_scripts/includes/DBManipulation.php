@@ -71,14 +71,67 @@
             $statement->execute();
             return $statement->get_result()->fetch_assoc();
         }
-
+        private function getu_recid(&$u_email){
+          $statement = $this->connection->prepare("SELECT u_recid FROM user WHERE u_email = ?");
+          $statement->bind_param("s",$response);
+          $statement->execute();
+          return $statement->get_result()->fetch_assoc();
+        }
  		// doesUserExist checks if an user is already in the database by email.
         private function doesUserExist(&$email){
-            $statement = $this->connection->prepare("SELECT id FROM user WHERE email = ?");
+            $statement = $this->connection->prepare("SELECT u_recid FROM user WHERE u_email = ?");
             $statement->bind_param("s", $email);
             $statement->execute();
             $statement->store_result();
             return $statement->num_rows > 0;
+        }
+
+        public function updatePassword(&$u_email, &$u_pword){
+          if(!($this->doesUserExist($u_email))) { // If user is not in the database, then we return 0.
+            return -1;
+          } else {
+            $password = USF_encrypt($u_pword);
+            $statement = $this->connection->prepare("UPDATE user SET u_pword = ? WHERE u_email = ?");
+            $statement->bind_param("ss", $password, $u_email);
+            if($statement->execute()){ // If statement executed we need a way to know that it did, therefore we return 1.
+                 return 1;
+            }else{
+                return 0;
+            }
+          }
+        }
+        public function getShoppingCart(&$u_email)
+        {
+          // If user is not in the database, then we return 0.
+          if(!($this->doesUserExist($u_email))) {
+            return -1;
+          } else {
+            $urecid = getu_recid($u_email);
+            $statement = $this->connection->prepare("SELECT * FROM shopping_cart WHERE u_recid = ?");
+            $statement->bind_param("s", $urecid);
+            $statement->execute();
+            return $statement->get_result()->fetch_assoc();
+          }
+        }
+        public function getShoppingHistory(&$u_email)
+        {
+          // If user is not in the database, then we return 0.
+          if(!($this->doesUserExist($u_email))) {
+            return -1;
+          } else {
+            $urecid = getu_recid($u_email);
+            $statement = $this->connection->prepare("SELECT * FROM purchase_history WHERE u_recid = ?");
+            $statement->bind_param("s", $urecid);
+            $statement->execute();
+            return $statement->get_result()->fetch_assoc();
+          }
+        }
+        public function getShippingTypeInfo(&$st_recid)
+        {
+          $statement = $this->connection->prepare("SELECT * FROM shipping_type WHERE st_recid = ?");
+          $statement->bind_param("s", $st_recid);
+          $statement->execute();
+          return $statement->get_result()->fetch_assoc();
         }
 
         public function USF_decrypt(&$string) {

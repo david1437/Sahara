@@ -1,9 +1,5 @@
 <?php
-  // Script that does the registration of an user. -Diego Fabiano
-
 require_once '../includes/DBManipulation.php';
-
-
 $response = array();
 
 // Making sure that the right method is requested.
@@ -16,10 +12,10 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         */
         // attempting to create user.
         $db_response = $db->createUser($_POST['u_email'],$_POST['u_pword']);
-        if($db_response){
+        if($db_response == 1){
           $response['error'] = false;
           $response['message'] = "User: " . $_POST['e_email'] . " created successfully ";
-        } else if($db_response < 0){
+        } else if($db_response == -1){
           $response['error'] = true;
           $response['message'] = "User is already in the database, please login";
         } else {
