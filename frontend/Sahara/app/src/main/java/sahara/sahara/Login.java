@@ -36,8 +36,82 @@ public class Login extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), Register.class));
-                finish();
+                if (isEmpty(email.getText().toString().trim())) {
+                    Toast.makeText(getApplicationContext(), "Email field can not be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (email.getText().toString().trim().length() < 8) {
+                    Toast.makeText(getApplicationContext(), "Email must be more than 8 characters!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (email.getText().toString().trim().length() > 50) {
+                    Toast.makeText(getApplicationContext(), "Email must be less than 50 characters!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (isEmpty(password.getText().toString().trim())) {
+                    Toast.makeText(getApplicationContext(), "Password field can not be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (password.getText().toString().trim().length() < 8) {
+                    Toast.makeText(getApplicationContext(), "Password must be more than 8 characters!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (password.getText().toString().trim().length() > 50) {
+                    Toast.makeText(getApplicationContext(), "Password must be less than 50 characters!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                register(email.getText().toString().trim(), password.getText().toString().trim());
+            }
+            private void register(final String userEmail, final String userPassword) {
+                StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                        Constants.URL_REGISTER,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    if (!jsonObject.getBoolean("error")){
+                                        startActivity(new Intent(getApplicationContext(), UserInfo.class));
+                                        PreferenceManager.getInstance(getApplicationContext()).userLogin(userEmail);
+                                        Toast.makeText(
+                                                getApplicationContext(),
+                                                "Registration Successfull",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
+                                        finish();
+                                    } else {
+                                        Toast.makeText(
+                                                getApplicationContext(),
+                                                "Registration Unsucessfull!",
+                                                Toast.LENGTH_LONG
+                                        ).show();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() { // If listener listens, then we had an error and we will display the msg from db.
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                if(error.getMessage() != null) {
+                                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                                }else {
+                                    Toast.makeText(
+                                            getApplicationContext(),
+                                            "Check your connection or contact the administrator.",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {  // Script returned a message, now we make does variables.
+                        Map<String, String> params = new HashMap<>();
+                        params.put("u_email", userEmail);
+                        params.put("u_pword", userPassword);
+                        return params;
+                    }
+                };
+                // This request handler keeps the internet connection until logout... Instead of attempt everytime.
+                RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
             }
         });
 
@@ -45,8 +119,8 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
-                    // startActivity(new Intent(getApplicationContext(), Register.class));
-                    // finish();
+                    //startActivity(new Intent(getApplicationContext(), Register.class));
+                    //finish();
                 }
                 if (isEmpty(email.getText().toString().trim())) {
                     Toast.makeText(getApplicationContext(), "Email field can not be empty!", Toast.LENGTH_SHORT).show();
@@ -118,8 +192,8 @@ public class Login extends AppCompatActivity {
                     @Override
                     protected Map<String, String> getParams() throws AuthFailureError {  // Script returned a message, now we make does variables.
                         Map<String, String> params = new HashMap<>();
-                        params.put("email", userEmail);
-                        params.put("password", userPassword);
+                        params.put("u_email", userEmail);
+                        params.put("u_pword", userPassword);
                         return params;
                     }
                 };
