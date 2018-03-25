@@ -1,6 +1,5 @@
 package sahara.sahara;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,33 +20,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.text.TextUtils.isEmpty;
+import static sahara.sahara.R.id.login;
 
-public class Login extends AppCompatActivity {
+public class Register extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        final EditText email = (EditText) findViewById(R.id.email);
-        final EditText password = (EditText) findViewById(R.id.password);
-        final Button login = (Button) findViewById(R.id.login);
-        final Button register = (Button) findViewById(R.id.register);
+        setContentView(R.layout.activity_register);
+        final EditText email = (EditText) findViewById(R.id.register_email);
+        final EditText password = (EditText) findViewById(R.id.register_password);
+        final Button register = (Button) findViewById(R.id.register_register);
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), Register.class));
-                finish();
-            }
-        });
-
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
-                    // startActivity(new Intent(getApplicationContext(), Register.class));
-                    // finish();
-                }
                 if (isEmpty(email.getText().toString().trim())) {
                     Toast.makeText(getApplicationContext(), "Email field can not be empty!", Toast.LENGTH_SHORT).show();
                     return;
@@ -68,12 +55,12 @@ public class Login extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Password must be less than 50 characters!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                login(email.getText().toString().trim(), password.getText().toString().trim());
+                register(email.getText().toString().trim(), password.getText().toString().trim());
             }
 
-            private void login(final String userEmail, final String userPassword) {
+            private void register(final String userEmail, final String userPassword) {
                 StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                        Constants.URL_LOGIN,
+                        Constants.URL_REGISTER,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -84,14 +71,14 @@ public class Login extends AppCompatActivity {
                                         PreferenceManager.getInstance(getApplicationContext()).userLogin(userEmail);
                                         Toast.makeText(
                                                 getApplicationContext(),
-                                                "Login Successfull",
+                                                "Registration Successfull",
                                                 Toast.LENGTH_SHORT
                                         ).show();
                                         // finish();
                                     } else {
                                         Toast.makeText(
                                                 getApplicationContext(),
-                                                "Login Un-Successfull Username or Password Incorrect",
+                                                "Registration Unsucessfull!",
                                                 Toast.LENGTH_LONG
                                         ).show();
                                     }
