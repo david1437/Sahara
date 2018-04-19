@@ -32,6 +32,20 @@ public class Login extends AppCompatActivity {
         final EditText password = (EditText) findViewById(R.id.password);
         final Button login = (Button) findViewById(R.id.login);
         final Button register = (Button) findViewById(R.id.register);
+        final Button forgot_pass = (Button) findViewById(R.id.forgot_password);
+
+        if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
+            startActivity(new Intent(getApplicationContext(), UserInfo.class));
+            finish();
+        }
+
+        forgot_pass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public  void  onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), ForgotPassword.class));
+                finish();
+            }
+        });
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,10 +132,6 @@ public class Login extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
-                    //startActivity(new Intent(getApplicationContext(), Register.class));
-                    //finish();
-                }
                 if (isEmpty(email.getText().toString().trim())) {
                     Toast.makeText(getApplicationContext(), "Email field can not be empty!", Toast.LENGTH_SHORT).show();
                     return;
