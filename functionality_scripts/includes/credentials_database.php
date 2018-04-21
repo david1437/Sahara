@@ -2,11 +2,11 @@
 
 // Script contains the definitions of the database that will be used and firebase api key of the android studio project. -Diego Fabiano
 
-	define('DATABASE_NAME','sahara');
+	define('DATABASE_NAME','project4');
 
 	define('DATABASE_USER','root');
 
-	define('DATABASE_PASSWORD','Stephanie101095');
+	define('DATABASE_PASSWORD','Dssherrier1!');
 
 	define('DATABASE_HOST','localhost');
 

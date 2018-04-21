@@ -20,7 +20,7 @@
                 return -1;
             }else{
                 $password = $this->USF_encrypt($u_pword);
-                $statement = $this->connection->prepare("INSERT INTO user (u_email, u_pword, ut_recid) VALUES (?, ?, 0);"); // If the user doesn't exist we will try to create it.
+                $statement = $this->connection->prepare("INSERT INTO users (u_email, u_pword, ut_recid) VALUES (?, ?, 1);"); // If the user doesn't exist we will try to create it.
                 $statement->bind_param("ss",$u_email,$password);
                 if($statement->execute()){ // If statement executed we need a way to know that it did, therefore we return 1.
                     return 1;
@@ -40,7 +40,7 @@
               {
                 $attribute = $key;
                 $attribute_value = $value;
-                $statement = $this->connection->prepare("UPDATE user SET ? = ? WHERE u_email = ?"); // If the user doesn't exist we will try to create it.
+                $statement = $this->connection->prepare("UPDATE users SET ? = ? WHERE u_email = ?"); // If the user doesn't exist we will try to create it.
                 $statement->bind_param("sss",$attribute,$attribute_value,$u_email);
                 // in case query fails
                 if(!$statement->execute())
@@ -66,20 +66,20 @@
 
  		// getUserByEmail finds a particular email for the user that we are looking for and returns all the information related to that email.
         public function getUserByEmail(&$u_email){
-            $statement = $this->connection->prepare("SELECT * FROM user WHERE u_email = ?");
+            $statement = $this->connection->prepare("SELECT * FROM users WHERE u_email = ?");
             $statement->bind_param("s",$u_email);
             $statement->execute();
             return $statement->get_result()->fetch_assoc();
         }
         private function getu_recid(&$u_email){
-          $statement = $this->connection->prepare("SELECT u_recid FROM user WHERE u_email = ?");
+          $statement = $this->connection->prepare("SELECT u_recid FROM users WHERE u_email = ?");
           $statement->bind_param("s",$response);
           $statement->execute();
           return $statement->get_result()->fetch_assoc();
         }
  		// doesUserExist checks if an user is already in the database by email.
         private function doesUserExist(&$email){
-            $statement = $this->connection->prepare("SELECT u_recid FROM user WHERE u_email = ?");
+            $statement = $this->connection->prepare("SELECT u_recid FROM users WHERE u_email = ?");
             $statement->bind_param("s", $email);
             $statement->execute();
             $statement->store_result();
@@ -90,8 +90,8 @@
           if(!($this->doesUserExist($u_email))) { // If user is not in the database, then we return 0.
             return -1;
           } else {
-            $password = USF_encrypt($u_pword);
-            $statement = $this->connection->prepare("UPDATE user SET u_pword = ? WHERE u_email = ?");
+            $password = $this->USF_encrypt($u_pword);
+            $statement = $this->connection->prepare("UPDATE users SET u_pword = ? WHERE u_email = ?");
             $statement->bind_param("ss", $password, $u_email);
             if($statement->execute()){ // If statement executed we need a way to know that it did, therefore we return 1.
                  return 1;

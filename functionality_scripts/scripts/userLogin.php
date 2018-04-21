@@ -7,7 +7,7 @@ require_once '../includes/DBManipulation.php';
 $response = array();
 
 if($_SERVER['REQUEST_METHOD']=='POST'){
-    if(isset($_POST['email']) and isset($_POST['password']))){
+    if(isset($_POST['u_email']) and isset($_POST['u_pword'])){
         $db = new DBManipulation();
         // We pass email and password to userLogin which will find if there is such matching pair.
         if($db->userLogin($_POST['u_email'], $_POST['u_pword'])){

@@ -56,33 +56,29 @@ public class ForgotPassword extends AppCompatActivity {
                 } else if (newPass.getText().toString().trim().length() > 50 || oldPass.getText().toString().trim().length() > 50) {
                     Toast.makeText(getApplicationContext(), "Password must be less than 50 characters!", Toast.LENGTH_SHORT).show();
                     return;
-                } else if (newPass.getText().toString().trim() != oldPass.getText().toString().trim()) {
-                    Toast.makeText(getApplicationContext(), "Old and New passwords must be the same!", Toast.LENGTH_SHORT).show();
-                    return;
                 }
                 ChangePassword(email.getText().toString().trim(), oldPass.getText().toString().trim(), newPass.getText().toString().trim());
             }
             public void ChangePassword(final String userEmail, final String oldPassword, final String newPassword) {
                 StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                        Constants.URL_REGISTER,
+                        Constants.URL_FORGOTPASSWORD,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 try {
                                     JSONObject jsonObject = new JSONObject(response);
                                     if (!jsonObject.getBoolean("error")) {
-                                        startActivity(new Intent(getApplicationContext(), UserInfo.class));
-                                        PreferenceManager.getInstance(getApplicationContext()).userLogin(userEmail);
                                         Toast.makeText(
                                                 getApplicationContext(),
-                                                "Password Changed Successfull",
+                                                "Password Changed Successfully!",
                                                 Toast.LENGTH_SHORT
                                         ).show();
+                                        startActivity(new Intent(getApplicationContext(), Login.class));
                                         finish();
                                     } else {
                                         Toast.makeText(
                                                 getApplicationContext(),
-                                                "Password Changed Unsucessfull!",
+                                                "Password Changed Unsucessfully!",
                                                 Toast.LENGTH_LONG
                                         ).show();
                                     }
