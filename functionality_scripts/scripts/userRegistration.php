@@ -14,7 +14,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         $db_response = $db->createUser($_POST['u_email'],$_POST['u_pword']);
         if($db_response == 1){
           $response['error'] = false;
-          $response['message'] = "User: " . $_POST['e_email'] . " created successfully ";
+          $response['message'] = "User: " . $_POST['u_email'] . " created successfully ";
         } else if($db_response == -1){
           $response['error'] = true;
           $response['message'] = "User is already in the database, please login";

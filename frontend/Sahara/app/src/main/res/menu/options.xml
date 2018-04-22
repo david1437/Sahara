@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/shopping_cart"
+        android:title="Shopping Cart" />
+
+    <item android:id="@+id/shopping_history"
+        android:title="Purchase History" />
+
+    <item android:id="@+id/update_information"
+        android:title="Update Information" />
+</menu>

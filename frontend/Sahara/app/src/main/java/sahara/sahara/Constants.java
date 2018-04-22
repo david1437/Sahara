@@ -9,6 +9,8 @@ public class Constants {
     public static final String URL_REGISTER = ROOT_URL+"userRegistration.php";
     public static final String URL_LOGIN = ROOT_URL+"userLogin.php";
     public static final String URL_FORGOTPASSWORD = ROOT_URL+"changePassword.php";
-    public static final String URL_CHANGEPASS =  ROOT_URL+"changePassword.php";
-    public static final String URL_UPDATETOKEN =  ROOT_URL+"updateToken.php.php";
+    public static final String URL_UPDATEUSERINFO =  ROOT_URL+"updateUserProfile.php";
+    public static final String URL_ALLPRODUCT =  ROOT_URL+"getAllProducts.php";
+    public static final String URL_SEARCHPRODUCT =  ROOT_URL+"searchProducts.php";
+    public static final String URL_ADDTOCART =  ROOT_URL+"addToCart.php";
 }

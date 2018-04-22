@@ -77,7 +77,9 @@ public class Register extends AppCompatActivity {
                                                 "Registration Successfull!",
                                                 Toast.LENGTH_SHORT
                                         ).show();
-                                        startActivity(new Intent(getApplicationContext(), Login.class));
+                                        Intent i = new Intent(getApplicationContext(), UserInfo.class);
+                                        i.putExtra("EMAIL", uemail);
+                                        startActivity(i);
                                         finish();
                                     } else {
                                         Toast.makeText(

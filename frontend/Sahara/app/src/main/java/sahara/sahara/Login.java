@@ -36,7 +36,7 @@ public class Login extends AppCompatActivity {
         final Button forgot_pass = (Button) findViewById(R.id.forgot_password);
 
         if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
-            //startActivity(new Intent(getApplicationContext(), mainactivity.class));
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
 

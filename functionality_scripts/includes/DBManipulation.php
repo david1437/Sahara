@@ -30,18 +30,22 @@
             }
         }
         // update user profile
-        public function updateUserProfile(&$parameters, &$u_email){
+        public function updateUserProfile(&$u_email, &$parameters){
           // If user is NOT in the database, then we can't change anything
-            if($this->doesUserExist($u_email) == 0){
+          if($this->doesUserExist($u_email) == 0){
               return -1;
             }else{
               // need to get parameters
+	      $parameters = json_decode($parameters);
               foreach ($parameters as $key => $value)
               {
-                $attribute = $key;
-                $attribute_value = $value;
-                $statement = $this->connection->prepare("UPDATE users SET ? = ? WHERE u_email = ?"); // If the user doesn't exist we will try to create it.
-                $statement->bind_param("sss",$attribute,$attribute_value,$u_email);
+		if($key === "u_dob") {
+			$int = (int)$value;
+			$value = date("Y-m-d",$int);
+		}
+		$query = "UPDATE users SET " . $key . " = " . "\"" . $value . "\"" . " WHERE u_email = " . "\"" . $u_email . "\"";		
+		$statement = $this->connection->prepare($query);
+                //$statement->bind_param("ss",$attribute_value,$u_email);
                 // in case query fails
                 if(!$statement->execute())
                 {
@@ -52,6 +56,85 @@
               return 1;
             }
         }
+
+	public function addToCart(&$u_email, &$p_recid, &$pr_recid) {
+          if($this->doesUserExist($u_email) == 0){
+              return -1;
+          }else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+		error_log("u_recid: " . $u_recid, 0);
+		// get current quantity
+		$quantity = $this->connection->prepare("SELECT pri_quantity FROM producer_inventory WHERE p_recid = ? AND pr_recid = ?");
+		$quantity->bind_param("ss", $p_recid, $pr_recid);
+		if(!$quantity->execute()) {
+			return 0;
+		}
+		$quantity = $quantity->get_result()->fetch_assoc()['pri_quantity']-1;
+		// update quantity to be quantity-1
+		$query = "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = ? AND pr_recid = ?";
+		$statement = $this->connection->prepare($query);
+		$statement->bind_param("sss",$quantity, $p_recid, $pr_recid);
+		if(!$statement->execute())
+                {
+                  return 0;
+                }
+		// get number currently in shopping cart
+		$quantity = $this->connection->prepare("SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
+		$quantity->bind_param("sss", $u_recid, $p_recid, $pr_recid);
+		if(!$quantity->execute()) {
+			return 0;
+		}
+		$quantity = $quantity->get_result();
+		error_log("Number of rows: " . $quantity->num_rows, 0);
+		if($quantity->num_rows > 0) {
+			$quantity = $quantity->fetch_assoc()['sc_quantity']+1;
+			// update shopping cart to quantity+1
+			$query = "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
+			$statement = $this->connection->prepare($query);
+			$statement->bind_param("ssss", $quantity, $u_recid, $p_recid, $pr_recid);
+                	if(!$statement->execute())
+                	{
+                  		return 0;
+                	}
+		}
+		else {
+			$query = "INSERT INTO shopping_cart VALUES (?, ?, ?, 1)";
+			$statement = $this->connection->prepare($query);
+			$statement->bind_param("sss",$u_recid, $p_recid, $pr_recid);
+			if(!$statement->execute())
+                	{
+                  		return 0;
+                	}	
+              }
+              // If we got here all queries were successfull.
+              return 1;
+          }
+  }
+
+	// get all products and categories
+        public function getProducts() {
+	    $statement = $this->connection->prepare("SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
+            $statement->execute();
+	    $result = $statement->get_result();
+	    $arr = array();
+	    while($row = $result->fetch_assoc()) {
+		$arr[] = $row;
+	    }
+	    return $arr;
+        }
+
+	// filter products and categories by product name
+        public function searchProducts(&$search){
+	    $statement = $this->connection->prepare("SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%" . $search . "%\" AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
+            $statement->execute();
+	    $result = $statement->get_result();
+	    $arr = array();
+	    while($row = $result->fetch_assoc()) {
+		$arr[] = $row;
+	    }
+	    return $arr;
+        }
+
 
  		// userLogin function searches for matching parameters (email, password) in the database.
          public function userLogin(&$u_email, &$u_pword){
@@ -73,7 +156,7 @@
         }
         private function getu_recid(&$u_email){
           $statement = $this->connection->prepare("SELECT u_recid FROM users WHERE u_email = ?");
-          $statement->bind_param("s",$response);
+          $statement->bind_param("s",$u_email);
           $statement->execute();
           return $statement->get_result()->fetch_assoc();
         }
