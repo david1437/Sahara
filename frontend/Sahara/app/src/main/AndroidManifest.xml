@@ -21,7 +21,8 @@
         <activity android:name=".UserInfo" />
         <activity android:name=".ForgotPassword" />
         <activity android:name=".Register" />
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".ShoppingCart"></activity>
     </application>
 
 </manifest>

@@ -111,6 +111,59 @@
           }
   }
 
+	public function removeFromCart(&$u_email, &$p_recid, &$pr_recid) {
+		          if($this->doesUserExist($u_email) == 0){
+              return -1;
+          }else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+		error_log("u_recid: " . $u_recid, 0);
+		// get current quantity
+		$quantity = $this->connection->prepare("SELECT pri_quantity FROM producer_inventory WHERE p_recid = ? AND pr_recid = ?");
+		$quantity->bind_param("ss", $p_recid, $pr_recid);
+		if(!$quantity->execute()) {
+			return 0;
+		}
+		$quantity = $quantity->get_result()->fetch_assoc()['pri_quantity']+1;
+		// update quantity to be quantity+1
+		$query = "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = ? AND pr_recid = ?";
+		$statement = $this->connection->prepare($query);
+		$statement->bind_param("sss",$quantity, $p_recid, $pr_recid);
+		if(!$statement->execute())
+                {
+                  return 0;
+                }
+		// get number currently in shopping cart
+		$quantity = $this->connection->prepare("SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
+		$quantity->bind_param("sss", $u_recid, $p_recid, $pr_recid);
+		if(!$quantity->execute()) {
+			return 0;
+		}
+		$quantity = $quantity->get_result();
+		$quantity = $quantity->fetch_assoc()['sc_quantity']-1;
+		// update shopping cart to quantity-1
+			if($quantity === 0) {
+				$query = "DELETE FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
+				$statement = $this->connection->prepare($query);
+				$statement->bind_param("sss", $u_recid, $p_recid, $pr_recid);
+                		if(!$statement->execute())
+                		{
+                  			return 0;
+                		}
+			}
+			else {
+				$query = "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
+				$statement = $this->connection->prepare($query);
+				$statement->bind_param("ssss", $quantity, $u_recid, $p_recid, $pr_recid);
+                		if(!$statement->execute())
+                		{
+                  			return 0;
+                		}
+			}
+		}
+              // If we got here all queries were successfull.
+              return 1;
+          }
+
 	// get all products and categories
         public function getProducts() {
 	    $statement = $this->connection->prepare("SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
@@ -135,6 +188,19 @@
 	    return $arr;
         }
 
+	// filter cart by product name
+        public function searchCart(&$u_email, &$search){
+	    $u_recid = $this->getu_recid($u_email)['u_recid'];
+	    $statement = $this->connection->prepare("SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, sc_quantity FROM products, product_category, shopping_cart WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%" . $search . "%\" AND products.p_recid = shopping_cart.p_recid AND products.pr_recid = shopping_cart.pr_recid AND u_recid = ?");
+	    $statement->bind_param("s", $u_recid);
+            $statement->execute();
+	    $result = $statement->get_result();
+	    $arr = array();
+	    while($row = $result->fetch_assoc()) {
+		$arr[] = $row;
+	    }
+	    return $arr;
+        }
 
  		// userLogin function searches for matching parameters (email, password) in the database.
          public function userLogin(&$u_email, &$u_pword){
@@ -189,11 +255,16 @@
           if(!($this->doesUserExist($u_email))) {
             return -1;
           } else {
-            $urecid = getu_recid($u_email);
-            $statement = $this->connection->prepare("SELECT * FROM shopping_cart WHERE u_recid = ?");
+            $urecid = $this->getu_recid($u_email)['u_recid'];
+            $statement = $this->connection->prepare("SELECT p.p_name, p.p_price, pc.c_name, p.p_recid, p.pr_recid, sc.sc_quantity FROM shopping_cart sc, products p, product_category pc WHERE sc.u_recid = ? AND p.c_recid = pc.c_recid AND sc.p_recid = p.p_recid AND p.pr_recid = sc.pr_recid");
             $statement->bind_param("s", $urecid);
             $statement->execute();
-            return $statement->get_result()->fetch_assoc();
+            $result = $statement->get_result();
+	    $arr = array();
+	    while($row = $result->fetch_assoc()) {
+		$arr[] = $row;
+	    }
+	    return $arr;
           }
         }
         public function getShoppingHistory(&$u_email)
@@ -202,7 +273,7 @@
           if(!($this->doesUserExist($u_email))) {
             return -1;
           } else {
-            $urecid = getu_recid($u_email);
+            $urecid = $this->getu_recid($u_email)['u_recid'];
             $statement = $this->connection->prepare("SELECT * FROM purchase_history WHERE u_recid = ?");
             $statement->bind_param("s", $urecid);
             $statement->execute();

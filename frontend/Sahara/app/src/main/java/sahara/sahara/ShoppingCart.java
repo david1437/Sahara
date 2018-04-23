@@ -1,10 +1,8 @@
 package sahara.sahara;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -31,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements ProductAdapter.ItemClickListener {
+public class ShoppingCart extends AppCompatActivity implements ProductAdapter.ItemClickListener {
 
     private RecyclerView mRecyclerView;
     private ProductAdapter mAdapter;
@@ -39,27 +36,8 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
     private ArrayList<Product> data = new ArrayList<>();
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.shopping_cart:
-                startActivity(new Intent(getApplicationContext(), ShoppingCart.class));
-                return true;
-            case R.id.shopping_history:
-                return true;
-            case R.id.update_information:
-                Intent i = new Intent(getApplicationContext(), UserInfo.class);
-                i.putExtra("EMAIL", PreferenceManager.getInstance(getApplicationContext()).getLogin());
-                startActivity(i);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.search, menu);
-        getMenuInflater().inflate(R.menu.options, menu);
         // Retrieve the SearchView and plug it into SearchManager
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
@@ -82,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
             }
             public void searchProducts(final String q, final ArrayList<Product> p) {
                 StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                        Constants.URL_SEARCHPRODUCT,
+                        Constants.URL_SEARCHCART,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -94,14 +72,16 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                         for(int i = 0; i < ja.length(); i++)
                                         {
                                             JSONObject jo = ja.getJSONObject(i);
-                                            p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                                    jo.getString("pr_recid"), jo.getString("p_recid")));
+                                            for(int j = 0; j < jo.getInt("sc_quantity"); ++j) {
+                                                p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
+                                                        jo.getString("pr_recid"), jo.getString("p_recid")));
+                                            }
                                         }
                                         mAdapter.notifyDataSetChanged();
                                     } else {
                                         Toast.makeText(
                                                 getApplicationContext(),
-                                                "Failed to fetch new products!",
+                                                "Failed to fetch shopping cart!",
                                                 Toast.LENGTH_LONG
                                         ).show();
                                     }
@@ -129,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                     protected Map<String, String> getParams() throws AuthFailureError {
                         Map<String, String> params = new HashMap<>();
                         params.put("query", q);
+                        params.put("u_email", PreferenceManager.getInstance(getApplicationContext()).getLogin());
                         return params;
                     }
                 };
@@ -142,29 +123,83 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_shopping_cart);
         mRecyclerView = (RecyclerView) findViewById(R.id.listView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        addAllProducts(data);
+        addShoppingCart(data);
         mAdapter = new ProductAdapter(this, data);
         mAdapter.setClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
     }
-
     @Override
     public void onItemClick(View view, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Would you like to add " + mAdapter.getItem(position).title + " to your shopping cart?");
+        builder.setMessage("Would you like to remove " + mAdapter.getItem(position).title + " to your shopping cart?");
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                addAllProducts(data);
-                addToCart(mAdapter.getItem(position));
-                addAllProducts(data);
+                addShoppingCart(data);
+                removeFromCart(mAdapter.getItem(position));
+                addShoppingCart(data);
                 dialog.cancel();
             }
+
+            private void removeFromCart(final Product item) {
+                StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                        Constants.URL_REMOVEFROMCART,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    if (!jsonObject.getBoolean("error")){
+                                        Toast.makeText(
+                                                getApplicationContext(),
+                                                item.title + " removed from cart!",
+                                                Toast.LENGTH_LONG
+                                        ).show();
+                                    } else {
+                                        Toast.makeText(
+                                                getApplicationContext(),
+                                                jsonObject.getString("message"),
+                                                Toast.LENGTH_LONG
+                                        ).show();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() { // If listener listens, then we had an error and we will display the msg from db.
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                if(error.getMessage() != null) {
+                                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                                }else {
+                                    Toast.makeText(
+                                            getApplicationContext(),
+                                            "Check your connection or contact the administrator.",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        params.put("u_email", PreferenceManager.getInstance(getApplicationContext()).getLogin());
+                        params.put("p_recid", item.productId);
+                        params.put("pr_recid", item.producerId);
+                        return params;
+                    }
+                };
+                // This request handler keeps the internet connection until logout... Instead of attempt everytime.
+                RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+            }
+
             public void addToCart(final Product p) {
                 StringRequest stringRequest = new StringRequest(Request.Method.POST,
                         Constants.URL_ADDTOCART,
@@ -229,9 +264,9 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
         dialog.show();
     }
 
-    public void addAllProducts(final ArrayList<Product> p) {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                Constants.URL_ALLPRODUCT,
+    public void addShoppingCart(final ArrayList<Product> p) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                Constants.URL_SHOPPINGCARTDATA,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -239,18 +274,20 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                             JSONObject jsonObject = new JSONObject(response);
                             if (!jsonObject.getBoolean("error")){
                                 p.clear();
-                                JSONArray ja = new JSONArray(jsonObject.getString("products"));
+                                JSONArray ja = new JSONArray(jsonObject.getString("data"));
                                 for(int i = 0; i < ja.length(); i++)
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
-                                    p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                            jo.getString("pr_recid"), jo.getString("p_recid")));
+                                    for(int j = 0; j < jo.getInt("sc_quantity"); ++j) {
+                                        p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
+                                                jo.getString("pr_recid"), jo.getString("p_recid")));
+                                    }
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {
                                 Toast.makeText(
                                         getApplicationContext(),
-                                        "Failed to fetch new products!",
+                                        "Failed to fetch shopping cart!",
                                         Toast.LENGTH_LONG
                                 ).show();
                             }
@@ -273,7 +310,14 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                         }
 
                     }
-                });
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("u_email", PreferenceManager.getInstance(getApplicationContext()).getLogin());
+                return params;
+            }
+        };
         // This request handler keeps the internet connection until logout... Instead of attempt everytime.
         RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
     }
