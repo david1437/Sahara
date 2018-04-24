@@ -50,7 +50,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(ProductAdapter.ViewHolder holder, int position) {
         holder.category.setText(mProducts.get(position).category);
-        holder.productInfo.setText(mProducts.get(position).title + " $" +
+        String info = mProducts.get(position).category;
+        if(info.isEmpty()){
+            holder.productInfo.setVisibility(View.GONE);
+        }
+        holder.productInfo.setText( + " $" +
                 Float.toString(mProducts.get(position).price));
     }
 
