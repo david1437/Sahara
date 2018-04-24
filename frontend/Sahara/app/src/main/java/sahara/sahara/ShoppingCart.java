@@ -35,7 +35,7 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
     private RecyclerView mRecyclerView;
     private ProductAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private Button checkout = (Button) findViewById(R.id.checkout);
+    private Button checkout;
     private ArrayList<Product> data = new ArrayList<>();
 
     @Override
@@ -75,10 +75,8 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
                                         for(int i = 0; i < ja.length(); i++)
                                         {
                                             JSONObject jo = ja.getJSONObject(i);
-                                            for(int j = 0; j < jo.getInt("sc_quantity"); ++j) {
-                                                p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                                        jo.getString("pr_recid"), jo.getString("p_recid")));
-                                            }
+                                            p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
+                                                    jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("sc_quantity")));
                                         }
                                         mAdapter.notifyDataSetChanged();
                                     } else {
@@ -127,6 +125,7 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_cart);
+        checkout = (Button) findViewById(R.id.checkout);
         mRecyclerView = (RecyclerView) findViewById(R.id.listView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -291,10 +290,8 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
                                 for(int i = 0; i < ja.length(); i++)
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
-                                    for(int j = 0; j < jo.getInt("sc_quantity"); ++j) {
                                         p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                                jo.getString("pr_recid"), jo.getString("p_recid")));
-                                    }
+                                                jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("sc_quantity")));
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {

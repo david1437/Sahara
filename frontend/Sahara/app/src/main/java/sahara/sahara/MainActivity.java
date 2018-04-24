@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
         switch (item.getItemId()) {
             case R.id.shopping_cart:
                 startActivity(new Intent(getApplicationContext(), ShoppingCart.class));
+                finish();
                 return true;
             case R.id.shopping_history:
                 return true;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                 Intent i = new Intent(getApplicationContext(), UserInfo.class);
                 i.putExtra("EMAIL", PreferenceManager.getInstance(getApplicationContext()).getLogin());
                 startActivity(i);
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                         {
                                             JSONObject jo = ja.getJSONObject(i);
                                             p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                                    jo.getString("pr_recid"), jo.getString("p_recid")));
+                                                    jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("pri_quantity")));
                                         }
                                         mAdapter.notifyDataSetChanged();
                                     } else {
@@ -244,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
                                     p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                            jo.getString("pr_recid"), jo.getString("p_recid")));
+                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("pri_quantity")));
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {

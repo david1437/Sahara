@@ -52,18 +52,29 @@
                     android:layout_height="wrap_content"
 
                     android:maxLines="3"
-                    android:text="This is shit"
+                    android:text="This is xxxx"
                     />
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/quantity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="54dp"
                     android:layout_centerVertical="true"
-                    android:text="Hello"
+                    android:text="quantity"
                     android:layout_toRightOf="@id/main"
-                    android:textColor="@color/colorAccent"/>
+                    android:textColor="@color/usfGreen"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/quantity"
+                    android:layout_marginLeft="42dp"
+                    android:layout_centerVertical="true"
+                    android:text="Price"
+                    android:id="@+id/price"
+                    android:textColor="@color/black"/>
 
             </RelativeLayout>
 

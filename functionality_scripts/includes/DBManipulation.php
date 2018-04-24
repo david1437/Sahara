@@ -268,7 +268,7 @@ public
   getProducts()
   {
     $statement = $this->connection->prepare(
-      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
+      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, producer_inventory.pri_quantity FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
     $statement->execute();
     $result = $statement->get_result();
     $arr    = array();
@@ -283,7 +283,7 @@ public
   function searchProducts(&$search)
   {
     $statement = $this->connection->prepare(
-      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
+      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, producer_inventory.pri FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
     $statement->execute();
     $result = $statement->get_result();
     $arr    = array();
