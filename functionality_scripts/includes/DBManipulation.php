@@ -113,6 +113,30 @@ public
             }
           }
 
+          public function getShippingPrice(&$u_email)
+          {
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            } else {
+              // CONTINUE HERE
+              $u_recid = $this->getu_recid($u_email)['u_recid'];
+              $statement = $this->connection->prepare("SELECT ut_recid FROM users WHERE u_recid = ?");
+              $statement->bind_param("s",$u_recid);
+              if(!$statement->execute())
+              {
+                return 0;
+              }
+              $ut_recid = $statement->get_result()['ut_recid'];
+              $second_stament = $this->connection->prepare("SELECT st_cost FROM shipping_type WHERE ut_recid = ?");
+              $second_stament->bind_param("s",$ut_recid);
+              if(!$second_stament->execute())
+              {
+                return 0;
+              }
+              return $second_stament->get_result()['st_cost'];
+            }
+          }
+          
           public function buyCart(&$u_email)
           {
             if($this->doesUserExist($u_email) == 0){
