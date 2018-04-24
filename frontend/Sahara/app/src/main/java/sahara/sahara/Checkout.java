@@ -36,6 +36,7 @@ public class Checkout extends AppCompatActivity implements ProductAdapter.ItemCl
     private TextView total;
     private Button cancel;
     private Button buy;
+    private float sum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +56,16 @@ public class Checkout extends AppCompatActivity implements ProductAdapter.ItemCl
         total = (TextView) findViewById(R.id.total);
         cancel = (Button) findViewById(R.id.cancel);
         buy = (Button) findViewById(R.id.placeOrder);
+        sum = 0;
+
+        getShipping();
+        getPrices();
 
         buy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
+                // startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                // finish();
             }
         });
 
@@ -70,6 +76,106 @@ public class Checkout extends AppCompatActivity implements ProductAdapter.ItemCl
                 finish();
             }
         });
+    }
+
+    public void getShipping() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                Constants.URL_GETSHIPPING,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (!jsonObject.getBoolean("error")){
+                                shipping.setText(jsonObject.getString("data"));
+                                sum += Float.parseFloat(jsonObject.getString("data"));
+                            } else {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        jsonObject.getString("message"),
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() { // If listener listens, then we had an error and we will display the msg from db.
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if(error.getMessage() != null) {
+                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                        }else {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "Check your connection or contact the administrator.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("u_email", PreferenceManager.getInstance(getApplicationContext()).getLogin());
+                return params;
+            }
+        };
+        // This request handler keeps the internet connection until logout... Instead of attempt everytime.
+        RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+    }
+
+    public void getPrices() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                Constants.URL_GETPRICE,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (!jsonObject.getBoolean("error")){
+                                taxes.setText(jsonObject.getString("taxes"));
+                                subtotal.setText(jsonObject.getString("price"));
+                                sum += Float.parseFloat(jsonObject.getString("taxes")) + Float.parseFloat(jsonObject.getString("price"));
+                                total.setText(Float.toString(sum));
+                            } else {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        jsonObject.getString("message"),
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() { // If listener listens, then we had an error and we will display the msg from db.
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if(error.getMessage() != null) {
+                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                        }else {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "Check your connection or contact the administrator.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("u_email", PreferenceManager.getInstance(getApplicationContext()).getLogin());
+                return params;
+            }
+        };
+        // This request handler keeps the internet connection until logout... Instead of attempt everytime.
+        RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
     }
 
     @Override

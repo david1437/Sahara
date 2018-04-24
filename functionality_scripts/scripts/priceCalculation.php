@@ -9,7 +9,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         // attempting to create user.
        	$db_response = $db->sumCart($_POST['u_email']);
         $response['error'] = false;
-        $response['message'] = "Price calculations succesfull"!;
+        $response['message'] = "Price calculations succesfull!";
 		$response['price'] = $db_response['price'];
         $response['taxes'] = $db_response['taxes'];
 	} else {

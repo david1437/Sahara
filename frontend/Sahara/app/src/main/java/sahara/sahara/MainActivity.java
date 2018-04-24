@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
         switch (item.getItemId()) {
             case R.id.shopping_cart:
                 startActivity(new Intent(getApplicationContext(), ShoppingCart.class));
-                finish();
                 return true;
             case R.id.shopping_history:
                 return true;
@@ -51,11 +50,16 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                 Intent i = new Intent(getApplicationContext(), UserInfo.class);
                 i.putExtra("EMAIL", PreferenceManager.getInstance(getApplicationContext()).getLogin());
                 startActivity(i);
-                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
     }
 
     @Override
@@ -162,9 +166,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                addAllProducts(data);
                 addToCart(mAdapter.getItem(position));
-                addAllProducts(data);
                 dialog.cancel();
             }
             public void addToCart(final Product p) {
@@ -181,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                                 p.title + " added to cart!",
                                                 Toast.LENGTH_LONG
                                         ).show();
+                                        addAllProducts(data);
+                                        mAdapter.notifyDataSetChanged();
                                     } else {
                                         Toast.makeText(
                                                 getApplicationContext(),
