@@ -1,4 +1,4 @@
-< ? php
+<?php
   // Script that updates information of an user. -Diego Fabiano
 
   require_once '../includes/DBManipulation.php';
