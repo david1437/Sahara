@@ -1,7 +1,5 @@
-< ? php
-
-      require_once '../includes/DBManipulation.php';
-
+<?php
+require_once '../includes/DBManipulation.php';
 $response = array();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

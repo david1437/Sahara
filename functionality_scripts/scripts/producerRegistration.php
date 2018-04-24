@@ -1,33 +1,27 @@
 <?php
-  // Script that updates information of an user. -Diego Fabiano
-
-  require_once '../includes/DBManipulation.php';
-
+      require_once '../includes/DBManipulation.php';
 $response = array();
 
 // Making sure that the right method is requested.
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-  if (isset($_POST['u_email'])) {
+  if (isset($_POST['pr_name']) and isset($_POST['pr_pword'])) {
     $db = new DBManipulation();
-    /*
-        date_default_timezone_set('EST5EDT');
-        $timestamp = date('Y-m-d G:i:s');
-        */
-    // attempting to create user.
-    $db_response = $db->updateUserProfile($_POST['u_email'], $_POST['parameters']);
+
+    $db_response = $db->createProducer($_POST['pr_name'], $_POST['pr_pword']);
     if ($db_response == 1) {
       $response['error']   = false;
-      $response['message'] = "User: ".$_POST['u_email']." updated successfully ";
+      $response['message'] = "Producer: ".$_POST['pr_name']." created successfully ";
     } else if ($db_response == -1) {
       $response['error']   = true;
-      $response['message'] = "User is not in the database, please register the user";
+      $response['message'] = "Producer is already in the database, please login";
     } else {
       $response['error']   = true;
       $response['message'] = "Some error occurred while tryng to access the database, please try again";
     }
   } else {
+    //we don't have enough parameters
     $response['error']   = true;
-    $response['message'] = "Make sure to send an email";
+    $response['message'] = "Make sure to enter both email and password";
   }
 } else { // If we got here it means we did not pushed the ewsright method from the app.
   $response['error']   = true;

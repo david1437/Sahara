@@ -1,4 +1,4 @@
-< ? php
+<?php
       require_once '../includes/DBManipulation.php';
 $response = array();
 
@@ -6,11 +6,7 @@ $response = array();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   if (isset($_POST['u_pword']) and isset($_POST['u_email'])) {
     $db = new DBManipulation();
-    /*
-        date_default_timezone_set('EST5EDT');
-        $timestamp = date('Y-m-d G:i:s');
-        */
-    // attempting to create user.
+
     $db_response = $db->createUser($_POST['u_email'], $_POST['u_pword']);
     if ($db_response == 1) {
       $response['error']   = false;

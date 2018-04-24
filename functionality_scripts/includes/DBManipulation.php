@@ -1,4 +1,4 @@
-< ? php
+<?php
 
   // Script defines basic database manipulations necessery to run the app.
   // -Diego Fabiano
@@ -29,11 +29,28 @@ public
     } else {
       $password  = $this->USF_encrypt($u_pword);
       $statement = $this->connection->prepare(
-        "INSERT INTO users (u_email, u_pword, ut_recid) VALUES (?, ?, "
-        "1);"); // If the user doesn't exist we will try to create it.
+        "INSERT INTO users (u_email, u_pword, ut_recid) VALUES (?, ?, 1);");
       $statement->bind_param("ss", $u_email, $password);
-      if ($statement->execute()) { // If statement executed we need a way to
-                                   // know that it did, therefore we return 1.
+      if ($statement->execute()) { 
+        return 1;
+      } else {
+        return 0; // Also a way to know it did not, therefore we return 2.
+      }
+    }
+  }
+  public
+  function createProducer(&$pr_name, &$pr_pword)
+  {
+    // If user is already in the database, then we don't want to override if
+    // this happens we return 0.
+    if ($this->doesProducerExist($pr_pword)) {
+      return -1;
+    } else {
+      $password  = $this->USF_encrypt($pr_pword);
+      $statement = $this->connection->prepare(
+        "INSERT INTO producers (pt_recid, pr_name, pr_pword) VALUES (1, ?, ?);");
+      $statement->bind_param("ss", $pr_name, $pr_pword);
+      if ($statement->execute()) {
         return 1;
       } else {
         return 0; // Also a way to know it did not, therefore we return 2.
@@ -68,7 +85,71 @@ public
       return 1;
     }
   }
+          public function sumCart(&$u_email)
+          {
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            } else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+                $statement = $this->connection->prepare("SELECT shopping_cart.sc_quantity, products.p_price FROM shopping_cart, products WHERE products.p_recid = shopping_cart.p_recid AND products.pr_recid = shopping_cart.pr_recid AND u_recid = ?");
+                $statement->bind_param("s",$u_recid);
+                if(!$statement->execute())
+                {
+                  return 0;
+                } else {
+                   $running_sum =0;
+                   $tax_running_sum = 0;
+                   $result = $statement->get_result();
+                   while($row = $result->fetch_assoc())
+                   {
+                    running_sum += row['sc_quantity']*row['p_price'];
+                    tax_running_sum += (row['sc_quantity']*row['p_price']) * 0.07;
+                   }
+                   $response = array(
+                      "price" => running_sum,
+                      "taxes" => tax_running_sum
+                   );
+                   return $response;
+                }
+            }
+          }
 
+          public function buyCart(&$u_email)
+          {
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            } else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+                $statement = $this->connection->prepare("SELECT * FROM shopping_cart WHERE u_recid = ?");
+                $statement->bind_param("s",$u_recid);
+                if(!$statement->execute())
+                {
+                  return 0;
+                } else {
+                   $result = $statement->get_result();
+                   date_default_timezone_set('EST5EDT');
+                   $timestamp = date('Y-m-d G:i:s');
+                   while($row = $result->fetch_assoc())
+                   {
+                    $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
+                    $history_stamentent->bind_param("ssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],
+                      $row['sc_quantity'], $timestamp);
+
+                    if(!$history_stamentent->execute())
+                    {
+                      return 0;
+                    }
+                   }
+                    $delete_statement = $this->connection->prepare("DELETE FROM shopping_cart WHERE u_recid = ?");
+                    $delete_statement->bind_param("s",$u_recid);
+                    if(!delete_statement->execute())
+                    {
+                      return 0;
+                    }
+                    return 1;
+                }
+            }
+          }
 public
   function addToCart(&$u_email, &$p_recid, &$pr_recid)
   {
@@ -304,7 +385,16 @@ private
     $statement->store_result();
     return $statement->num_rows > 0;
   }
-
+private
+  function doesProducerExist(&$pr_name)
+  {
+    $statement = $this->connection->prepare(
+      "SELECT pr_recid FROM producers WHERE pr_name = ?");
+    $statement->bind_param("s", $pr_name);
+    $statement->execute();
+    $statement->store_result();
+    return $statement->num_rows > 0;
+  }
 public
   function updatePassword(&$u_email, &$u_pword)
   {
@@ -359,7 +449,7 @@ public
         "SELECT * FROM purchase_history WHERE u_recid = ?");
       $statement->bind_param("s", $urecid);
       $statement->execute();
-      return $statement->get_result()->fetch_assoc();
+      return $statement->get_result();
     }
   }
 public
