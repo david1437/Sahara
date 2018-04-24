@@ -1,4 +1,4 @@
-< ? php
+<?php
 
   // Script contains function that stablishes a connection with the database.
   // -Diego Fabiano

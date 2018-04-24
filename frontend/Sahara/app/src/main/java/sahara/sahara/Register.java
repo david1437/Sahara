@@ -71,7 +71,6 @@ public class Register extends AppCompatActivity {
                             @Override
                             public void onResponse(String response) {
                                 try {
-                                    Log.d("LOG", "onResponse: " + response);
                                     JSONObject jsonObject = new JSONObject(response);
                                     if (!jsonObject.getBoolean("error")) {
                                         Toast.makeText(
