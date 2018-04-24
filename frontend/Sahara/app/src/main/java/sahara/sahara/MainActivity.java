@@ -57,6 +57,12 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.search, menu);
         getMenuInflater().inflate(R.menu.options, menu);
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                         {
                                             JSONObject jo = ja.getJSONObject(i);
                                             p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                                    jo.getString("pr_recid"), jo.getString("p_recid")));
+                                                    jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("pri_quantity")));
                                         }
                                         mAdapter.notifyDataSetChanged();
                                     } else {
@@ -160,9 +166,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                addAllProducts(data);
                 addToCart(mAdapter.getItem(position));
-                addAllProducts(data);
                 dialog.cancel();
             }
             public void addToCart(final Product p) {
@@ -179,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                                 p.title + " added to cart!",
                                                 Toast.LENGTH_LONG
                                         ).show();
+                                        addAllProducts(data);
+                                        mAdapter.notifyDataSetChanged();
                                     } else {
                                         Toast.makeText(
                                                 getApplicationContext(),
@@ -244,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
                                     p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                            jo.getString("pr_recid"), jo.getString("p_recid")));
+                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("pri_quantity")));
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {

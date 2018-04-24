@@ -24,11 +24,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView category;
-        public TextView productInfo;
+        public TextView title;
+        public TextView price;
+        public TextView quantity;
         public ViewHolder(View v) {
             super(v);
             category = (TextView) v.findViewById(R.id.category);
-            productInfo = (TextView) v.findViewById(R.id.product);
+            title = (TextView) v.findViewById(R.id.product);
+            price = (TextView) v.findViewById(R.id.price);
+            quantity = (TextView) v.findViewById(R.id.quantity);
             v.setOnClickListener(this);
         }
 
@@ -50,12 +54,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(ProductAdapter.ViewHolder holder, int position) {
         holder.category.setText(mProducts.get(position).category);
-        String info = mProducts.get(position).category;
-        if(info.isEmpty()){
-            holder.productInfo.setVisibility(View.GONE);
-        }
-        holder.productInfo.setText(" $" +
-                Float.toString(mProducts.get(position).price));
+        holder.price.setText("$" + Float.toString(mProducts.get(position).price));
+        holder.quantity.setText("x" + mProducts.get(position).quantity);
+        holder.title.setText(mProducts.get(position).title);
     }
 
     @Override
