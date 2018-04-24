@@ -27,12 +27,13 @@ public class ForgotPassword extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_forgot_password);
+        setContentView(R.layout.activity_register);
 
-        final EditText email = (EditText) findViewById(R.id.forgotPassEmail);
-        final EditText oldPass = (EditText) findViewById(R.id.oldPassword);
-        final EditText newPass = (EditText) findViewById(R.id.newPassword);
-        final Button changePass = (Button) findViewById(R.id.change_pass);
+        final EditText email = (EditText) findViewById(R.id.r_email);
+        final EditText oldPass = (EditText) findViewById(R.id.r_password2);
+        final EditText newPass = (EditText) findViewById(R.id.r_password);
+        final Button changePass = (Button) findViewById(R.id.register);
+        changePass.setText("CHANGE PASSWORD");
 
         changePass.setOnClickListener(new View.OnClickListener() {
             @Override

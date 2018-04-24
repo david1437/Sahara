@@ -9,31 +9,63 @@
         cardview:cardElevation="3dp"
         cardview:cardUseCompatPadding="true">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_weight="0.1"
+                android:scaleType="centerInside"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_menu_black_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <RelativeLayout
+                android:layout_weight="0.8"
+                android:layout_width="0dp"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:id="@+id/main"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:orientation="vertical"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/product"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="3"
+                    android:text="THis is host"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textColor="#444"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/product"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="12dp"
-                android:maxLines="3"
-                android:padding="8dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:textColor="#444"
-                android:textSize="18dp"
-                android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/category"
+                    android:layout_below="@id/product"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
 
-            <TextView
-                android:id="@+id/category"
-                android:layout_below="@id/product"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
-                android:maxLines="3"
-                android:padding="8dp" />
+                    android:maxLines="3"
+                    android:text="This is shit"
+                    />
+                </LinearLayout>
 
-        </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="54dp"
+                    android:layout_centerVertical="true"
+                    android:text="Hello"
+                    android:layout_toRightOf="@id/main"
+                    android:textColor="@color/colorAccent"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
     </android.support.v7.widget.CardView>
