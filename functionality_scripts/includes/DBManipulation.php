@@ -1,4 +1,4 @@
-< ? php
+<?php
 
   // Script defines basic database manipulations necessery to run the app.
   // -Diego Fabiano
@@ -12,8 +12,7 @@ private
   function
   __construct()
   {
-    require_once dirname(__FILE__)
-      .'/connection_database.php';          // Calls connection script
+    require_once dirname(__FILE__).'/connection_database.php';          // Calls connection script
     $db               = new DBConnection(); // New database connection
     $this->connection = $db->connection();
   }
@@ -29,11 +28,28 @@ public
     } else {
       $password  = $this->USF_encrypt($u_pword);
       $statement = $this->connection->prepare(
-        "INSERT INTO users (u_email, u_pword, ut_recid) VALUES (?, ?, "
-        "1);"); // If the user doesn't exist we will try to create it.
+        "INSERT INTO users (u_email, u_pword, ut_recid) VALUES (?, ?, 1);");
       $statement->bind_param("ss", $u_email, $password);
-      if ($statement->execute()) { // If statement executed we need a way to
-                                   // know that it did, therefore we return 1.
+      if ($statement->execute()) { 
+        return 1;
+      } else {
+        return 0; // Also a way to know it did not, therefore we return 2.
+      }
+    }
+  }
+  public
+  function createProducer(&$pr_name, &$pr_pword)
+  {
+    // If user is already in the database, then we don't want to override if
+    // this happens we return 0.
+    if ($this->doesProducerExist($pr_pword)) {
+      return -1;
+    } else {
+      $password  = $this->USF_encrypt($pr_pword);
+      $statement = $this->connection->prepare(
+        "INSERT INTO producers (pt_recid, pr_name, pr_pword) VALUES (1, ?, ?);");
+      $statement->bind_param("ss", $pr_name, $pr_pword);
+      if ($statement->execute()) {
         return 1;
       } else {
         return 0; // Also a way to know it did not, therefore we return 2.
@@ -50,8 +66,8 @@ public
     } else {
       // need to get parameters
       $parameters = json_decode($parameters);
-      foreach ($parameters as $key = > $value) {
-        if ($key == = "u_dob") {
+      foreach ($parameters as $key => $value) {
+        if ($key === "u_dob") {
           $int   = (int) $value;
           $value = date("Y-m-d", $int);
         }
@@ -68,7 +84,71 @@ public
       return 1;
     }
   }
+          public function sumCart(&$u_email)
+          {
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            } else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+                $statement = $this->connection->prepare("SELECT shopping_cart.sc_quantity, products.p_price FROM shopping_cart, products WHERE products.p_recid = shopping_cart.p_recid AND products.pr_recid = shopping_cart.pr_recid AND u_recid = ?");
+                $statement->bind_param("s",$u_recid);
+                if(!$statement->execute())
+                {
+                  return 0;
+                } else {
+                   $running_sum =0;
+                   $tax_running_sum = 0;
+                   $result = $statement->get_result();
+                   while($row = $result->fetch_assoc())
+                   {
+                    $running_sum += $row['sc_quantity']*$row['p_price'];
+                    $tax_running_sum += ($row['sc_quantity']*$row['p_price']) * 0.07;
+                   }
+                   $response = array(
+                      "price" => $running_sum,
+                      "taxes" => $tax_running_sum
+                   );
+                   return $response;
+                }
+            }
+          }
 
+          public function buyCart(&$u_email)
+          {
+            if($this->doesUserExist($u_email) == 0){
+              return -1;
+            } else {
+                $u_recid = $this->getu_recid($u_email)['u_recid'];
+                $statement = $this->connection->prepare("SELECT * FROM shopping_cart WHERE u_recid = ?");
+                $statement->bind_param("s",$u_recid);
+                if(!$statement->execute())
+                {
+                  return 0;
+                } else {
+                   $result = $statement->get_result();
+                   date_default_timezone_set('EST5EDT');
+                   $timestamp = date('Y-m-d G:i:s');
+                   while($row = $result->fetch_assoc())
+                   {
+                    $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
+                    $history_stamentent->bind_param("ssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],
+                      $row['sc_quantity'], $timestamp);
+
+                    if(!$history_stamentent->execute())
+                    {
+                      return 0;
+                    }
+                   }
+                    $delete_statement = $this->connection->prepare("DELETE FROM shopping_cart WHERE u_recid = ?");
+                    $delete_statement->bind_param("s",$u_recid);
+                    if(!$delete_statement->execute())
+                    {
+                      return 0;
+                    }
+                    return 1;
+                }
+            }
+          }
 public
   function addToCart(&$u_email, &$p_recid, &$pr_recid)
   {
@@ -79,9 +159,7 @@ public
       error_log("u_recid: ".$u_recid, 0);
       // get current quantity
       $quantity = $this->connection->prepare(
-        "SELECT pri_quantity FROM "
-        "producer_inventory WHERE p_recid "
-        "= ? AND pr_recid = ?");
+        "SELECT pri_quantity FROM producer_inventory WHERE p_recid = ? AND pr_recid = ?");
       $quantity->bind_param("ss", $p_recid, $pr_recid);
       if (!$quantity->execute()) {
         return 0;
@@ -89,8 +167,7 @@ public
       $quantity = $quantity->get_result()->fetch_assoc()['pri_quantity'] - 1;
       // update quantity to be quantity-1
       $query =
-        "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = "
-        "? AND pr_recid = ?";
+        "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = ? AND pr_recid = ?";
       $statement = $this->connection->prepare($query);
       $statement->bind_param("sss", $quantity, $p_recid, $pr_recid);
       if (!$statement->execute()) {
@@ -98,8 +175,7 @@ public
       }
       // get number currently in shopping cart
       $quantity = $this->connection->prepare(
-        "SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid "
-        "= ? AND pr_recid = ?");
+        "SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
       $quantity->bind_param("sss", $u_recid, $p_recid, $pr_recid);
       if (!$quantity->execute()) {
         return 0;
@@ -109,9 +185,7 @@ public
       if ($quantity->num_rows > 0) {
         $quantity = $quantity->fetch_assoc()['sc_quantity'] + 1;
         // update shopping cart to quantity+1
-        $query =
-          "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? "
-          "AND p_recid = ? AND pr_recid = ?";
+        $query = "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
         $statement = $this->connection->prepare($query);
         $statement->bind_param("ssss", $quantity, $u_recid, $p_recid,
                                $pr_recid);
@@ -141,9 +215,7 @@ public
       error_log("u_recid: ".$u_recid, 0);
       // get current quantity
       $quantity = $this->connection->prepare(
-        "SELECT pri_quantity FROM "
-        "producer_inventory WHERE p_recid "
-        "= ? AND pr_recid = ?");
+        "SELECT pri_quantity FROM producer_inventory WHERE p_recid = ? AND pr_recid = ?");
       $quantity->bind_param("ss", $p_recid, $pr_recid);
       if (!$quantity->execute()) {
         return 0;
@@ -151,8 +223,7 @@ public
       $quantity = $quantity->get_result()->fetch_assoc()['pri_quantity'] + 1;
       // update quantity to be quantity+1
       $query =
-        "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = "
-        "? AND pr_recid = ?";
+        "UPDATE producer_inventory SET pri_quantity = ? WHERE p_recid = ? AND pr_recid = ?";
       $statement = $this->connection->prepare($query);
       $statement->bind_param("sss", $quantity, $p_recid, $pr_recid);
       if (!$statement->execute()) {
@@ -160,8 +231,7 @@ public
       }
       // get number currently in shopping cart
       $quantity = $this->connection->prepare(
-        "SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid "
-        "= ? AND pr_recid = ?");
+        "SELECT sc_quantity FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
       $quantity->bind_param("sss", $u_recid, $p_recid, $pr_recid);
       if (!$quantity->execute()) {
         return 0;
@@ -169,10 +239,9 @@ public
       $quantity = $quantity->get_result();
       $quantity = $quantity->fetch_assoc()['sc_quantity'] - 1;
       // update shopping cart to quantity-1
-      if ($quantity == = 0) {
+      if ($quantity === 0) {
         $query =
-          "DELETE FROM shopping_cart WHERE u_recid = ? AND p_recid = ? "
-          "AND pr_recid = ?";
+          "DELETE FROM shopping_cart WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
         $statement = $this->connection->prepare($query);
         $statement->bind_param("sss", $u_recid, $p_recid, $pr_recid);
         if (!$statement->execute()) {
@@ -180,8 +249,7 @@ public
         }
       } else {
         $query =
-          "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? "
-          "AND p_recid = ? AND pr_recid = ?";
+          "UPDATE shopping_cart SET sc_quantity = ? WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?";
         $statement = $this->connection->prepare($query);
         $statement->bind_param("ssss", $quantity, $u_recid, $p_recid,
                                $pr_recid);
@@ -200,11 +268,7 @@ public
   getProducts()
   {
     $statement = $this->connection->prepare(
-      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name "
-      "FROM products, product_category, producer_inventory WHERE "
-      "products.c_recid = product_category.c_recid AND products.p_recid = "
-      "producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 "
-      "AND products.pr_recid = producer_inventory.pr_recid");
+      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
     $statement->execute();
     $result = $statement->get_result();
     $arr    = array();
@@ -219,13 +283,7 @@ public
   function searchProducts(&$search)
   {
     $statement = $this->connection->prepare(
-      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name "
-      "FROM products, product_category, producer_inventory WHERE "
-      "products.c_recid = product_category.c_recid AND products.p_name LIKE "
-      "\"%".$search.
-      "%\" AND products.p_recid = producer_inventory.p_recid "
-      "AND producer_inventory.pri_quantity > 0 AND "
-      "products.pr_recid = producer_inventory.pr_recid");
+      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name FROM products, product_category, producer_inventory WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = producer_inventory.p_recid AND producer_inventory.pri_quantity > 0 AND products.pr_recid = producer_inventory.pr_recid");
     $statement->execute();
     $result = $statement->get_result();
     $arr    = array();
@@ -241,13 +299,7 @@ public
   {
     $u_recid   = $this->getu_recid($u_email)['u_recid'];
     $statement = $this->connection->prepare(
-      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, "
-      "sc_quantity FROM products, product_category, shopping_cart WHERE "
-      "products.c_recid = product_category.c_recid AND products.p_name LIKE "
-      "\"%".$search.
-      "%\" AND products.p_recid = shopping_cart.p_recid AND "
-      "products.pr_recid = shopping_cart.pr_recid AND u_recid "
-      "= ?");
+      "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, sc_quantity FROM products, product_category, shopping_cart WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = shopping_cart.p_recid AND products.pr_recid = shopping_cart.pr_recid AND u_recid = ?");
     $statement->bind_param("s", $u_recid);
     $statement->execute();
     $result = $statement->get_result();
@@ -304,7 +356,16 @@ private
     $statement->store_result();
     return $statement->num_rows > 0;
   }
-
+private
+  function doesProducerExist(&$pr_name)
+  {
+    $statement = $this->connection->prepare(
+      "SELECT pr_recid FROM producers WHERE pr_name = ?");
+    $statement->bind_param("s", $pr_name);
+    $statement->execute();
+    $statement->store_result();
+    return $statement->num_rows > 0;
+  }
 public
   function updatePassword(&$u_email, &$u_pword)
   {
@@ -333,10 +394,7 @@ public
     } else {
       $urecid    = $this->getu_recid($u_email)['u_recid'];
       $statement = $this->connection->prepare(
-        "SELECT p.p_name, p.p_price, pc.c_name, p.p_recid, p.pr_recid, "
-        "sc.sc_quantity FROM shopping_cart sc, products p, product_category "
-        "pc WHERE sc.u_recid = ? AND p.c_recid = pc.c_recid AND sc.p_recid = "
-        "p.p_recid AND p.pr_recid = sc.pr_recid");
+        "SELECT p.p_name, p.p_price, pc.c_name, p.p_recid, p.pr_recid, sc.sc_quantity FROM shopping_cart sc, products p, product_category pc WHERE sc.u_recid = ? AND p.c_recid = pc.c_recid AND sc.p_recid = p.p_recid AND p.pr_recid = sc.pr_recid");
       $statement->bind_param("s", $urecid);
       $statement->execute();
       $result = $statement->get_result();
@@ -359,7 +417,7 @@ public
         "SELECT * FROM purchase_history WHERE u_recid = ?");
       $statement->bind_param("s", $urecid);
       $statement->execute();
-      return $statement->get_result()->fetch_assoc();
+      return $statement->get_result();
     }
   }
 public

@@ -3,6 +3,7 @@ package sahara.sahara;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -33,6 +35,7 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
     private RecyclerView mRecyclerView;
     private ProductAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private Button checkout = (Button) findViewById(R.id.checkout);
     private ArrayList<Product> data = new ArrayList<>();
 
     @Override
@@ -132,7 +135,17 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
         mAdapter = new ProductAdapter(this, data);
         mAdapter.setClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
+
+        checkout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Checkout.class));
+                finish();
+            }
+        });
+
     }
+
     @Override
     public void onItemClick(View view, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

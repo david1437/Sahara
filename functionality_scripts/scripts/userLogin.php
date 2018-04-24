@@ -1,4 +1,4 @@
-< ? php
+<?php
 
   // Script that does the validation of an user. -Diego Fabiano
 

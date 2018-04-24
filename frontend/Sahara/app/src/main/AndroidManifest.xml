@@ -22,7 +22,8 @@
         <activity android:name=".ForgotPassword" />
         <activity android:name=".Register" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".ShoppingCart"></activity>
+        <activity android:name=".ShoppingCart" />
+        <activity android:name=".Checkout"></activity>
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-< ? php
+<?php
 
   // Script contains the definitions of the database that will be used and
   // firebase api key of the android studio project. -Diego Fabiano
