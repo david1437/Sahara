@@ -54,7 +54,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         if(info.isEmpty()){
             holder.productInfo.setVisibility(View.GONE);
         }
-        holder.productInfo.setText( + " $" +
+        holder.productInfo.setText(" $" +
                 Float.toString(mProducts.get(position).price));
     }
 
