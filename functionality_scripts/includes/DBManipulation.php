@@ -48,7 +48,7 @@ public
       $password  = $this->USF_encrypt($pr_pword);
       $statement = $this->connection->prepare(
         "INSERT INTO producers (pt_recid, pr_name, pr_pword) VALUES (1, ?, ?);");
-      $statement->bind_param("ss", $pr_name, $pr_pword);
+      $statement->bind_param("ss", $pr_name, $password);
       if ($statement->execute()) {
         return 1;
       } else {
@@ -154,12 +154,26 @@ public
                    $timestamp = date('Y-m-d G:i:s');
                    while($row = $result->fetch_assoc())
                    {
-                    $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
-                    $history_stamentent->bind_param("sssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],$row['sc_quantity'], $timestamp);
-
-                    if(!$history_stamentent->execute())
+                    $check_stamentent= $this->connection->prepare("SELECT * FROM purchase_history ph WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
+                    $check_stamentent->bind_param("sss",$row['u_recid'],$row['p_recid'],$row['pr_recid']);
+		    if(!$check_stamentent->execute()) {
+		        return 0;
+		    }
+                    $check_stamentent = $check_stamentent->get_result();
+                    if ($check_stamentent->num_rows > 0) 
                     {
-                      return 0;
+                      $number = $check_stamentent->fetch_assoc()['ph_quantity'] + $row['sc_quantity'];
+                      $update_stament= $this->connection->prepare("UPDATE purchase_history SET ph_quantity = ? , ph_dt_utc = ? WHERE u_recid = ? AND p_recid = ? AND pr_recid = ?");
+                      $update_stament->bind_param("sssss", $number, $timestamp, $row['u_recid'],$row['p_recid'],$row['pr_recid']);
+		      $update_stament->execute();
+                    } else {
+                      $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
+                      $history_stamentent->bind_param("sssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],$row['sc_quantity'], $timestamp);
+
+                      if(!$history_stamentent->execute())
+                      {
+                        return 0;
+                      }
                     }
                    }
                     $delete_statement = $this->connection->prepare("DELETE FROM shopping_cart WHERE u_recid = ?");
@@ -172,6 +186,7 @@ public
                 }
             }
           }
+
 public
   function addToCart(&$u_email, &$p_recid, &$pr_recid)
   {
@@ -336,7 +351,7 @@ public
   function searchHistoryCart(&$u_email, &$search, &$sort, &$type)
   {
     $u_recid   = $this->getu_recid($u_email)['u_recid'];
-    $query = "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, ph_quantity FROM products, product_category, purchase_history WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = purchase_history.p_recid AND products.pr_recid = purchase_history.pr_recid AND purchase_history.u_recid = ".$u_recid;
+    $query = "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, ph_quantity, ph_dt_utc FROM products, product_category, purchase_history WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = purchase_history.p_recid AND products.pr_recid = purchase_history.pr_recid AND purchase_history.u_recid = ".$u_recid;
     if($sort == 1)
     {
       $query .= " ORDER BY purchase_history.ph_dt_utc " . $type;
@@ -351,6 +366,20 @@ public
     return $arr;
   }
 
+
+  // producerLogin function searches for matching parameters (email, password) in
+  // the database.
+public
+  function producerLogin(&$u_email, &$u_pword)
+  {
+    $password = $this->USF_encrypt($u_pword);
+
+    $statement = $this->connection->prepare("SELECT pr_recid FROM producers WHERE pr_name = ? AND pr_pword = ?");
+    $statement->bind_param("ss", $u_email, $password);
+    $statement->execute();
+    $statement->store_result();
+    return $statement->num_rows > 0;
+  }
 
   // userLogin function searches for matching parameters (email, password) in
   // the database.
@@ -456,10 +485,15 @@ public
     } else {
       $urecid    = $this->getu_recid($u_email)['u_recid'];
       $statement = $this->connection->prepare(
-        "SELECT * FROM purchase_history WHERE u_recid = ?");
+        "SELECT p.p_name, p.p_recid, p.pr_recid, ph.ph_quantity, p.p_price, pc.c_name, ph.ph_dt_utc FROM purchase_history ph, products p, product_category pc WHERE u_recid = ? AND p.p_recid = ph.p_recid AND p.pr_recid = ph.pr_recid AND p.c_recid = pc.c_recid");
       $statement->bind_param("s", $urecid);
       $statement->execute();
-      return $statement->get_result();
+      $result = $statement->get_result();
+      $arr = array();
+      while ($row = $result->fetch_assoc()) {
+        $arr[] = $row;
+      }
+      return $arr;
     }
   }
 public

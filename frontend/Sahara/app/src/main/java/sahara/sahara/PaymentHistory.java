@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.RadioButton;
@@ -29,13 +30,14 @@ import java.util.Map;
 
 public class PaymentHistory extends AppCompatActivity implements ProductAdapter.ItemClickListener {
 
-    private RadioButton radioButtonAsc = (RadioButton) findViewById(R.id.sortAsc);
-    private RadioButton radioButtonDsc = (RadioButton) findViewById(R.id.sortDsc);
+    private RadioButton radioButtonAsc;
+    private RadioButton radioButtonDsc;
     private RecyclerView mRecyclerView;
     private ProductAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Product> data = new ArrayList<>();
     private int ascending;
+    private String query = "";
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
@@ -46,10 +48,11 @@ public class PaymentHistory extends AppCompatActivity implements ProductAdapter.
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                if (!searchView.isIconified()) {
+            public boolean onQueryTextSubmit(String s) {
+                if( ! searchView.isIconified()) {
                     searchView.setIconified(true);
                 }
+                query = s;
                 if(ascending == 1) {
                     sortData(data, query, 1, "ASC");
                 }
@@ -61,29 +64,33 @@ public class PaymentHistory extends AppCompatActivity implements ProductAdapter.
                 }
                 return false;
             }
-
             @Override
             public boolean onQueryTextChange(String s) {
+                query = s;
                 if(ascending == 1) {
-                    sortData(data, s, 1, "ASC");
+                    sortData(data, query, 1, "ASC");
                 }
                 else if (ascending == 0) {
-                    sortData(data, s, 1, "DESC");
+                    sortData(data, query, 1, "DESC");
                 }
                 else {
-                    sortData(data, s, 0, "");
+                    sortData(data, query, 0, "");
                 }
                 return false;
             }
         });
-        return false;
+        return true;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_history);
-        setTitle("Sahara");
+        setTitle("Shopping History");
+        radioButtonAsc = (RadioButton) findViewById(R.id.sortAsc);
+        radioButtonDsc = (RadioButton) findViewById(R.id.sortDsc);
+        radioButtonAsc.setOnClickListener(radio_listener);
+        radioButtonDsc.setOnClickListener(radio_listener);
         mRecyclerView = (RecyclerView) findViewById(R.id.listView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -95,20 +102,44 @@ public class PaymentHistory extends AppCompatActivity implements ProductAdapter.
         ascending = -1;
     }
 
-    public void onRadioButtonClicked(View v) {
-        boolean checked = ((RadioButton) v).isChecked();
-        switch(v.getId()) {
-            case R.id.sortAsc:
-                if(checked) {
-                    ascending = 1;
+    public View.OnClickListener radio_listener = new View.OnClickListener() {
+        public void onClick(View v) {
+            Log.d("ERROR", "onClick: ");
+            boolean checked = ((RadioButton) v).isChecked();
+            switch (v.getId()) {
+                case R.id.sortAsc: {
+                    if (checked) {
+                        ascending = 1;
+                        if(ascending == 1) {
+                            sortData(data, query, 1, "ASC");
+                        }
+                        else if (ascending == 0) {
+                            sortData(data, query, 1, "DESC");
+                        }
+                        else {
+                            sortData(data, query, 0, "");
+                        }
+                    }
+                    break;
                 }
-                break;
-            case R.id.sortDsc:
-                if(checked) {
-                    ascending = 0;
+                case R.id.sortDsc: {
+                    if (checked) {
+                        ascending = 0;
+                        if(ascending == 1) {
+                            sortData(data, query, 1, "ASC");
+                        }
+                        else if (ascending == 0) {
+                            sortData(data, query, 1, "DESC");
+                        }
+                        else {
+                            sortData(data, query, 0, "");
+                        }
+                    }
+                    break;
                 }
+            }
         }
-    }
+    };
 
     @Override
     public void onItemClick(View view, final int position) {
@@ -129,8 +160,8 @@ public class PaymentHistory extends AppCompatActivity implements ProductAdapter.
                                 for(int i = 0; i < ja.length(); i++)
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
-                                    p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("ph_quantity")));
+                                    p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), "",
+                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("ph_quantity"), jo.getString("ph_dt_utc")));
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {
@@ -188,8 +219,8 @@ public class PaymentHistory extends AppCompatActivity implements ProductAdapter.
                                 for(int i = 0; i < ja.length(); i++)
                                 {
                                     JSONObject jo = ja.getJSONObject(i);
-                                    p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), jo.getString("c_name"),
-                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("ph_quantity")));
+                                    p.add(new Product(jo.getString("p_name"), Float.parseFloat(jo.getString("p_price")), "",
+                                            jo.getString("pr_recid"), jo.getString("p_recid"), jo.getInt("ph_quantity"), jo.getString("ph_dt_utc")));
                                 }
                                 mAdapter.notifyDataSetChanged();
                             } else {

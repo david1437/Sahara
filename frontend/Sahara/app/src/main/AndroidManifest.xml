@@ -25,7 +25,10 @@
         <activity android:name=".ShoppingCart" />
         <activity android:name=".Checkout" />
         <activity android:name=".Payment" />
-        <activity android:name=".PaymentHistory"></activity>
+        <activity android:name=".PaymentHistory" />
+        <activity android:name=".ProducerRegister" />
+        <activity android:name=".ProducerLogin" />
+        <activity android:name=".ProducerMainActivity"></activity>
     </application>
 
 </manifest>

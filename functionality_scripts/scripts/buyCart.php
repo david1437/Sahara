@@ -12,9 +12,10 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         {
         $response['error'] = true;
         $response['message'] = "Problem occured in the database";
-        }
+        } else {
         $response['error'] = false;
         $response['message'] = "Cart bought succesfully!";
+	}
   } else {
     $response['error'] = true;
     $response['message'] = "Missing email";

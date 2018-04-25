@@ -11,6 +11,7 @@ public class PreferenceManager {
     private static PreferenceManager mInstance;
     private static Context mCtx;
     private static final String KEY_USER_EMAIL = "email";
+    private static final String KEY_PRODUCER = "producer";
     private static final String SHARED_PREF_NAME = "mysharedpreferences";
 
     private PreferenceManager(Context context) {
@@ -27,6 +28,19 @@ public class PreferenceManager {
     public String getLogin() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString(KEY_USER_EMAIL, null);
+    }
+
+    public int getProducer() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_PRODUCER, 0);
+    }
+
+    public boolean producer(int flag) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(KEY_PRODUCER, flag);
+        editor.apply();
+        return true;
     }
 
     public boolean userLogin(String email) {

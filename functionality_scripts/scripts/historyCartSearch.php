@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $db_response          = $db->searchHistoryCart($_POST['u_email'], $_POST['query'], $_POST['sort'], $_POST['type']);
     $response['error']    = false;
     $response['message']  = "Products fetched successfully!";
-    $response['products'] = $db_response;
+    $response['data'] = $db_response;
   } else {
     $response['error']   = true;
     $response['message'] = "String must be passed!";

@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
     @Override
     public void onResume(){
         super.onResume();
-
     }
 
     @Override

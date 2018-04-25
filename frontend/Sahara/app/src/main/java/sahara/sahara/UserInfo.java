@@ -165,7 +165,7 @@ public class UserInfo extends FragmentActivity implements DatePickerDialog.OnDat
                     Toast.makeText(getApplicationContext(), "Phone number can't be empty!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                else if(phone.getText().toString().trim().length() > 10) {
+                else if(phone.getText().toString().trim().length() > 13) {
                     Toast.makeText(getApplicationContext(), "Phone number can't be longer than 10 digits!", Toast.LENGTH_SHORT).show();
                     return;
                 }

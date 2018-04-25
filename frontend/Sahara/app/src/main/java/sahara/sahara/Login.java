@@ -1,9 +1,14 @@
 package sahara.sahara;
 
+import android.app.SearchManager;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,15 +20,37 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static android.text.TextUtils.isEmpty;
 
 public class Login extends AppCompatActivity {
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.producer, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.producer_login:
+                startActivity(new Intent(getApplicationContext(), ProducerLogin.class));
+                return true;
+            case R.id.producer_register:
+                startActivity(new Intent(getApplicationContext(), ProducerRegister.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +65,11 @@ public class Login extends AppCompatActivity {
 
         if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+        }
+
+        if (PreferenceManager.getInstance(getApplicationContext()).getProducer() == 1) {
+            startActivity(new Intent(getApplicationContext(), ProducerMainActivity.class));
             finish();
         }
 
