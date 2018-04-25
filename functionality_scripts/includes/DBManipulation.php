@@ -37,6 +37,65 @@ public
       }
     }
   }
+
+  public 
+  function addProduct(&$pr_name, &$p_price, &$c_category, &$p_name, &$quantity)
+  {
+    $pr_recid = $db->getProducerByEmail($pr_name)['pr_recid'];
+
+    $c_recid = $db->getCategoryId($c_category)['c_recid'];
+
+    $statement = $this->connection->prepare("INSERT INTO products (pr_recid, p_name, p_price, c_recid) 
+      VALUES (?,?,?,?)");
+    $statement->bind_param("ssss", $pr_recid, $p_name, $p_price, $c_recid);
+    if(!$statement->execute())
+    {
+      return -1;
+    }
+    // get p_recid
+    $product_id_stmt = $this->connection->prepare("SELECT p_recid FROM products WHERE pr_recid = ? AND p_name = ? AND p_price = ?");
+    $product_id_stmt->bind_param("sss", $pr_recid, $p_name, $p_price);
+    if(!$product_id_stmt->execute())
+    {
+      return -1;
+    }
+    $p_recid = $product_id_stmt->get_result()->fetch_assoc()['p_recid'];
+
+    $update_stmt = $this->connection->prepare("INSERT INTO producer_inventory (p_recid,pr_recid, pr_quantity)
+      VALUES(?,?,?");
+    $update_stmt->bind_param("sss", $p_recid, $pr_recid, $quantity);
+
+    if(!$update_stmt->execute())
+    {
+      return -1;
+    }
+    return 1;
+
+  }
+
+  public
+  function getCategoryId(&$c_name)
+  {
+    $statement = $this->connection->prepare("SELECT c_recid FROM product_category WHERE c_name = ?");
+    $statement->bind_param("s",$c_name);
+    if(!$statement->execute())
+    {
+      return -1;
+    }
+    return $statement->get_result()->fetch_assoc();
+  }
+
+  public getCategories()
+  {
+    $statement = $this->connection->prepare("SELECT c_name FROM product_category");
+    $statement->execute();
+    $result = $statement->get_result();
+    $arr    = array();
+    while ($row = $result->fetch_assoc()) {
+      $arr[] = $row;
+    }
+    return $arr;
+  }
   public
   function createProducer(&$pr_name, &$pr_pword)
   {
