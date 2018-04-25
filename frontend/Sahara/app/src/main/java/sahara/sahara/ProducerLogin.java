@@ -80,6 +80,7 @@ public class ProducerLogin extends AppCompatActivity {
                                     JSONObject jsonObject = new JSONObject(response);
                                     if (!jsonObject.getBoolean("error")){
                                         PreferenceManager.getInstance(getApplicationContext()).producer(1);
+                                        PreferenceManager.getInstance(getApplicationContext()).userLogin(userEmail);
                                         Toast.makeText(
                                                 getApplicationContext(),
                                                 jsonObject.getString("message"),

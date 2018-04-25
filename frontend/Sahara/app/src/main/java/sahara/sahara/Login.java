@@ -63,13 +63,13 @@ public class Login extends AppCompatActivity {
         final FloatingActionButton register = (FloatingActionButton) findViewById(R.id.register);
         final Button forgot_pass = (Button) findViewById(R.id.forgot_password);
 
-        if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        if (PreferenceManager.getInstance(getApplicationContext()).getProducer() == 1) {
+            startActivity(new Intent(getApplicationContext(), ProducerMainActivity.class));
             finish();
         }
 
-        if (PreferenceManager.getInstance(getApplicationContext()).getProducer() == 1) {
-            startActivity(new Intent(getApplicationContext(), ProducerMainActivity.class));
+        if (PreferenceManager.getInstance(getApplicationContext()).isUserLoggedIn()) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
 
