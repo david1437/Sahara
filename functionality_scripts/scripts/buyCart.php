@@ -8,6 +8,11 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         $db = new DBManipulation();
         // attempting to create user.
         $db_response = $db->buyCart($_POST['u_email']);
+        if($db_response == 0)
+        {
+        $response['error'] = true;
+        $response['message'] = "Problem occured in the database";
+        }
         $response['error'] = false;
         $response['message'] = "Cart bought succesfully!";
   } else {

@@ -155,8 +155,7 @@ public
                    while($row = $result->fetch_assoc())
                    {
                     $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
-                    $history_stamentent->bind_param("ssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],
-                      $row['sc_quantity'], $timestamp);
+                    $history_stamentent->bind_param("sssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],$row['sc_quantity'], $timestamp);
 
                     if(!$history_stamentent->execute())
                     {
@@ -333,6 +332,25 @@ public
     }
     return $arr;
   }
+  public
+  function searchHistoryCart(&$u_email, &$search, &$sort)
+  {
+    $u_recid   = $this->getu_recid($u_email)['u_recid'];
+    $query = "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, sc_quantity FROM products, product_category, purchase_history WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = purchase_history.p_recid AND products.pr_recid = purchase_history.pr_recid AND purchase_history.u_recid = ".$u_recid;
+    if($sort == 1)
+    {
+      $query .= " ORDER BY purchase_history.ph_dt_utc DESC"
+    }
+    $statement = $this->connection->prepare($query);
+    $statement->execute();
+    $result = $statement->get_result();
+    $arr    = array();
+    while ($row = $result->fetch_assoc()) {
+      $arr[] = $row;
+    }
+    return $arr;
+  }
+
 
   // userLogin function searches for matching parameters (email, password) in
   // the database.
