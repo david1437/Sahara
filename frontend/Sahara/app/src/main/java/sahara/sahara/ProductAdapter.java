@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import static android.text.TextUtils.isEmpty;
+
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
     public ArrayList<Product> mProducts;
@@ -53,7 +55,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ProductAdapter.ViewHolder holder, int position) {
-        holder.category.setText(mProducts.get(position).category);
+        if(isEmpty(mProducts.get(position).category)) {
+            holder.category.setText(mProducts.get(position).date);
+        } else {
+            holder.category.setText(mProducts.get(position).category);
+        }
         holder.price.setText("$" + Float.toString(mProducts.get(position).price));
         holder.quantity.setText("x" + mProducts.get(position).quantity);
         holder.title.setText(mProducts.get(position).title);
