@@ -336,7 +336,7 @@ public
   function searchHistoryCart(&$u_email, &$search, &$sort, &$type)
   {
     $u_recid   = $this->getu_recid($u_email)['u_recid'];
-    $query = "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, sc_quantity FROM products, product_category, purchase_history WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = purchase_history.p_recid AND products.pr_recid = purchase_history.pr_recid AND purchase_history.u_recid = ".$u_recid;
+    $query = "SELECT products.p_recid, products.pr_recid, p_name, p_price, c_name, ph_quantity FROM products, product_category, purchase_history WHERE products.c_recid = product_category.c_recid AND products.p_name LIKE \"%".$search."%\" AND products.p_recid = purchase_history.p_recid AND products.pr_recid = purchase_history.pr_recid AND purchase_history.u_recid = ".$u_recid;
     if($sort == 1)
     {
       $query .= " ORDER BY purchase_history.ph_dt_utc " . $type;
