@@ -347,6 +347,19 @@ public
     }
     return $arr;
   }
+
+  public function getProducerByEmail($pr_name) {
+    $statement = $this->connection->prepare("SELECT * FROM producers WHERE pr_name = ?");
+    $statement->bind_param("s", $pr_name);
+    $statement->execute();
+    $result = $statement->get_result();
+    $arr    = array();
+    while ($row = $result->fetch_assoc()) {
+      $arr[] = $row;
+    }
+    return $arr;
+  }
+
   public
   function searchHistoryCart(&$u_email, &$search, &$sort, &$type)
   {
