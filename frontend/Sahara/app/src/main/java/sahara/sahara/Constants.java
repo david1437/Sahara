@@ -23,4 +23,5 @@ public class Constants {
     public static final String URL_HISTORYCARTSEARCH = ROOT_URL + "historyCartSearch.php";
     public static final String URL_REGISTERPRODUCER = ROOT_URL + "producerRegistration.php";
     public static final String URL_PRODUCERLOGIN = ROOT_URL + "producerLogin.php";
+    public static final String URL_GETCATEGORIES = ROOT_URL+"getAllCategories.php";
 }

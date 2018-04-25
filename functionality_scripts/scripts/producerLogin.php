@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($db->producerLogin($_POST['pr_name'], $_POST['pr_pword'])) {
       $producer                  = $db->getProducerByEmail($_POST['pr_name']);
       $response['error']     = false;
+      $response['message'] = "Log in Successfull!";
       $response['producer_data'] = $producer;
     } else {
       // If we get here it means that input was a wrong combination.
