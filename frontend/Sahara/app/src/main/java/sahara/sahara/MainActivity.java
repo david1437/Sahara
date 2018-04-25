@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
                 startActivity(new Intent(getApplicationContext(), ShoppingCart.class));
                 return true;
             case R.id.shopping_history:
+                startActivity(new Intent(getApplicationContext(), PaymentHistory.class));
                 return true;
             case R.id.update_information:
                 Intent i = new Intent(getApplicationContext(), UserInfo.class);
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.It
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Sahara");
         mRecyclerView = (RecyclerView) findViewById(R.id.listView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);

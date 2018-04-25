@@ -126,14 +126,14 @@ public
               {
                 return 0;
               }
-              $ut_recid = $statement->get_result()['ut_recid'];
-              $second_stament = $this->connection->prepare("SELECT st_cost FROM shipping_type WHERE ut_recid = ?");
+              $ut_recid = $statement->get_result()->fetch_assoc()['ut_recid'];
+              $second_stament = $this->connection->prepare("SELECT st_price FROM shipping_type WHERE ut_recid = ?");
               $second_stament->bind_param("s",$ut_recid);
               if(!$second_stament->execute())
               {
-                return 0;
+		return 0;
               }
-              return $second_stament->get_result()['st_cost'];
+              return $second_stament->get_result()->fetch_assoc()['st_price'];
             }
           }
           
@@ -155,7 +155,7 @@ public
                    while($row = $result->fetch_assoc())
                    {
                     $history_stamentent = $this->connection->prepare("INSERT INTO purchase_history VALUES(?,?,?,?,?)");
-                    $history_stamentent->bind_param("ssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],
+                    $history_stamentent->bind_param("sssss",$row['u_recid'],$row['p_recid'],$row['pr_recid'],
                       $row['sc_quantity'], $timestamp);
 
                     if(!$history_stamentent->execute())

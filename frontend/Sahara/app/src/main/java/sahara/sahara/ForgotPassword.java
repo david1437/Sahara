@@ -28,6 +28,7 @@ public class ForgotPassword extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        setTitle("Forgotten Password");
 
         final EditText email = (EditText) findViewById(R.id.r_email);
         final EditText oldPass = (EditText) findViewById(R.id.r_password2);
