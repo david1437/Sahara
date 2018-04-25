@@ -126,14 +126,14 @@ public
               {
                 return 0;
               }
-              $ut_recid = $statement->get_result()['ut_recid'];
-              $second_stament = $this->connection->prepare("SELECT st_cost FROM shipping_type WHERE ut_recid = ?");
+              $ut_recid = $statement->get_result()->fetch_assoc()['ut_recid'];
+              $second_stament = $this->connection->prepare("SELECT st_price FROM shipping_type WHERE ut_recid = ?");
               $second_stament->bind_param("s",$ut_recid);
               if(!$second_stament->execute())
               {
-                return 0;
+		return 0;
               }
-              return $second_stament->get_result()['st_cost'];
+              return $second_stament->get_result()->fetch_assoc()['st_price'];
             }
           }
           

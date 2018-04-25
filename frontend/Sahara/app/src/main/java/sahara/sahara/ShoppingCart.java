@@ -125,6 +125,7 @@ public class ShoppingCart extends AppCompatActivity implements ProductAdapter.It
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_cart);
+        setTitle("Shopping Cart");
         checkout = (Button) findViewById(R.id.checkout);
         mRecyclerView = (RecyclerView) findViewById(R.id.listView);
         mRecyclerView.setHasFixedSize(true);

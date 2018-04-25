@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -49,6 +50,7 @@ public class UserInfo extends FragmentActivity implements DatePickerDialog.OnDat
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
+        setTitle("Update User Information");
         final Button addInfo = (Button) findViewById(R.id.addinfo);
         final Button skip = (Button) findViewById(R.id.skip);
         final EditText fname = (EditText) findViewById(R.id.firstname);
@@ -57,6 +59,7 @@ public class UserInfo extends FragmentActivity implements DatePickerDialog.OnDat
         final Button dob = (Button) findViewById(R.id.birthday);
         final EditText address = (EditText) findViewById(R.id.address);
         final EditText phone = (EditText) findViewById(R.id.phonenumber);
+        phone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
         final EditText zipcode = (EditText) findViewById(R.id.zipcode);
 
         skip.setOnClickListener(new View.OnClickListener() {

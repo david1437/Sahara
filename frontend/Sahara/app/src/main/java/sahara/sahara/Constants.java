@@ -19,4 +19,6 @@ public class Constants {
     public static final String URL_BUYCART = ROOT_URL+"buyCart.php";
     public static final String URL_GETSHIPPING = ROOT_URL+"getShippingPrice.php";
     public static final String URL_GETPRICE = ROOT_URL+"priceCalculation.php";
+    public static final String URL_SHOPPINGHISTORY = ROOT_URL+"getShoppingHistory.php";
+    public static final String URL_HISTORYCARTSEARCH = ROOT_URL+"historyCartSearch.php";
 }
